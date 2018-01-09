@@ -6,6 +6,7 @@
 import pygame.camera
 import pygame.image
 import sys
+from array import array
 
 pygame.camera.init()
 
@@ -29,13 +30,23 @@ screen = pygame.display.set_mode( ( WIDTH, HEIGHT ) )
 #pygame.display.set_caption("CamView")
 
 def avg_images(img):
-    image_l = img[0].copy()
+    image_l = img[0].copy() # result
     arr = pygame.surfarray.pixels3d(image_l)
-    arr_t = arr[:, :, 0]
-    arr[:, :, 0] = arr[:, :, 1]
-    arr[:, :, 1] = arr[:, :, 2]
-    arr[:, :, 2] = arr_t
-    del arr_t
+
+    images_count = len(img)
+    if images_count > 1:
+        for i in range(1, images_count):
+            arr_i = pygame.surfarray.pixels3d(img[i])
+            arr[:, :, 0] += arr_i[:, :, 0]
+            arr[:, :, 1] += arr_i[:, :, 1]
+            arr[:, :, 2] += arr_i[:, :, 2]
+            img[i].unlock()
+            del arr_i
+        #arr = [x // len(img) for x in arr]
+        arr[:, :, 0] = [x // images_count for x in arr[:, :, 0]]
+        arr[:, :, 1] = [x // images_count for x in arr[:, :, 1]]
+        arr[:, :, 2] = [x // images_count for x in arr[:, :, 2]]
+
     del arr
     image_l.unlock()
     return image_l
