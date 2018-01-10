@@ -6,49 +6,59 @@
 import pygame.camera
 import pygame.image
 import sys
+import numpy as np
 from array import array
 
+
+def append_img_from_cam(img_arr, webcam):
+    img_copy = pygame.surfarray.array2d(webcam.get_image())
+    img_arr.append(img_copy)
+
+
 pygame.camera.init()
-
 cameras = pygame.camera.list_cameras()
-
-print "Using camera %s ..." % cameras[0]
-
 webcam = pygame.camera.Camera(cameras[0])
-
 webcam.start()
 
 # grab first frame
 img = []
-img.append(webcam.get_image())
-image = img[0].copy()
+append_img_from_cam(img, webcam)
+image = webcam.get_image().copy()  #temp
 
 WIDTH = image.get_width()
 HEIGHT = image.get_height()
 
-screen = pygame.display.set_mode( ( WIDTH, HEIGHT ) )
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 #pygame.display.set_caption("CamView")
 
+
 def avg_images(img):
-    image_l = img[0].copy() # result
-    arr = pygame.surfarray.pixels3d(image_l)
-
     images_count = len(img)
-    if images_count > 1:
-        for i in range(1, images_count):
-            arr_i = pygame.surfarray.pixels3d(img[i])
-            arr[:, :, 0] += arr_i[:, :, 0]
-            arr[:, :, 1] += arr_i[:, :, 1]
-            arr[:, :, 2] += arr_i[:, :, 2]
-            img[i].unlock()
-            del arr_i
-        #arr = [x // len(img) for x in arr]
-        arr[:, :, 0] = [x // images_count for x in arr[:, :, 0]]
-        arr[:, :, 1] = [x // images_count for x in arr[:, :, 1]]
-        arr[:, :, 2] = [x // images_count for x in arr[:, :, 2]]
 
-    del arr
-    image_l.unlock()
+    image_l = img[0].copy()  # result
+    #arr = pygame.surfarray.pixels3d(image_l)
+    #arr_float = arr.copy()
+    #for i in range(len(arr_float)):
+    #    for j in range(len(arr_float[i])):
+    #        for k in range(len(arr_float[i][j])):
+    #            arr_float[i][j][k] = float(arr_float[i][j][k]) / images_count
+
+    if images_count > 1:
+
+        for y in range(1, images_count):
+            arr_i = pygame.surfarray.pixels3d(img[y])
+
+            #arr_float = numpy.add(arr_float, arr_i)
+            #for i in range(len(arr)):
+            #    for j in range(len(arr_i[i])):
+            #        for k in range(len(arr_i[i][j])):
+            #            arr_float[i][j][k] += float(arr_i[i][j][k]) / images_count
+            #np.mean(list_of_arrays[t - N + 1:t + 1], axis=0)
+            del arr_i
+            img[y].unlock()
+
+    #del arr
+    #image_l.unlock()
     return image_l
 
 
@@ -60,9 +70,9 @@ while True :
     screen.blit(image, (0, 0))
     pygame.display.flip()
     # grab next frame
-    img.append(webcam.get_image())
+    append_img_from_cam(img, webcam)
 
-    if len (img) > 10:
+    if len(img) > 3:
         img.pop(0)
 
     image = avg_images(img)
