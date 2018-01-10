@@ -21,32 +21,14 @@ webcam = pygame.camera.Camera(cameras[0])
 webcam.start()
 
 
-# test
-def rgb_int2tuple(rgbint):
-    return (rgbint // 256 // 256 % 256, rgbint // 256 % 256, rgbint % 256)
-
-#im_t = webcam.get_image()
-#print im_t.get_bytesize()
-#im_3d = pygame.surfarray.array3d(im_t)
-#print im_3d[0][0][0]
-#print hex(im_3d[0][0][0])
-#sf_t = pygame.surfarray.make_surface(im_3d)
-#print sf_t.get_at((0, 0))
-#webcam.stop()
-#exit(0)
-
-# grab first frame
 img = []
 append_img_from_cam(img, webcam)
 image_1 = webcam.get_image().copy()
 screen = pygame.display.set_mode((image_1.get_width(), image_1.get_height()))
-#pygame.display.set_caption("CamView")
 
 
 def avg_images(img):
-    # print type(img[0])
     rz = np.mean(img, axis=0)
-    # print type(rz)
     return rz
 
 
@@ -61,7 +43,7 @@ while True:
     # grab next frame
     append_img_from_cam(img, webcam)
 
-    if len(img) > 3:
+    if len(img) > 10:
         img.pop(0)
 
     image = avg_images(img)
